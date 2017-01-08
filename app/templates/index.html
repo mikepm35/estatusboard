@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>estatusboard</title>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="https://use.fontawesome.com/4dea295ed1.js"></script>
+    <link href="static/css/cover.css" rel="stylesheet">
+
+    <script>
+      var images = {{imgfullpath | safe}};
+      var i = 0;
+
+       $( document).ready(function(){
+         function redraw() {
+             var interval = 1000*60*1; //ms*s*min
+
+             var now = new Date().getTime();
+             var frame = Math.floor(now / interval) % 2; // 0 or 1
+
+             $('body').css('background', 'url('+images[i]+') no-repeat center center fixed');
+             $('body').css('background-size', 'cover');
+             $('body').fadeIn('slow');
+             i++;
+             if (i == images.length) {
+               i = 0;
+             }
+
+             now = new Date().getTime();
+             setTimeout(redraw, interval - (now % interval));
+         }
+         redraw();
+       });
+    </script>
+
+    <script>
+       $(document).ready(function(){
+         function weathercall() {
+             var interval = 1000*60*1; //ms*s*min
+
+             var now = new Date().getTime();
+             var frame = Math.floor(now / interval) % 2; // 0 or 1
+
+             $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+
+             $.getJSON($SCRIPT_ROOT + '/getweather', {}, function(data) {
+               document.getElementById('myweather').innerHTML = data.temp + "&deg &middot <img src=\"" + data.icon + "\">  &middot  " + data.rain + "% " + "<i class=\"fa fa-tint\" aria-hidden=\"true\" style=\"color: #0099ff\"></i>";
+             });
+
+             now = new Date().getTime();
+             setTimeout(weathercall, interval - (now % interval));
+         }
+         weathercall();
+       });
+    </script>
+
+    <script>
+      var mo_str = ["Jan", "Feb", "March", "April", "May", "June", "July", "Aug", "Sept", "Oct", "Nov", "Dec"];
+      var d_str = ["st", "nd", "rd", "th", "th", "th", "th", "th", "th", "th", "th", "th", "th", "th", "th", "th", "th", "th", "th", "th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th", "th", "st"];
+      var day_str = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+
+      function startTime() {
+          var today = new Date();
+          var yr = today.getFullYear();
+          var mo = today.getMonth();
+          var d = today.getDate();
+          var day = today.getDay();
+          var h = today.getHours();
+          var m = today.getMinutes();
+          var s = today.getSeconds();
+          h = regTime(h);
+          m = checkTime(m);
+          s = checkTime(s);
+          document.getElementById('mytime').innerHTML = h + ":" + m + ":" + s;
+          document.getElementById('mydate').innerHTML = mo_str[mo] + " " + d + "<sup>" + d_str[d-1] + "</sup>";
+          var t = setTimeout(startTime, 500);
+      }
+      function checkTime(i) {
+          if (i < 10) {i = "0" + i};  // add zero in front of numbers < 10
+          return i;
+      }
+      function regTime(i) {
+        if (i > 12) {i = i - 12};
+        return i;
+      }
+    </script>
+  </head>
+
+  <body onload="startTime()">
+    <div class="site-wrapper">
+      <div class="site-wrapper-inner">
+        <div class="cover-container">
+          <div class="masthead clearfix">
+            <div class="inner">
+              <h3 class="masthead-nav" id="mydate"></h3>
+            </div>
+          </div>
+          <div class="inner cover">
+            <h1 class="cover-heading big-text" id="mytime"></h1>
+            <h1 class="cover-heading" id="myweather"></h1>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </body>
+</html>
